@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand: přírodní tmavě zelená -->
+    <color name="brand_green">#0E4D3A</color>
+    <color name="brand_green_dark">#0B3F2F</color>
+    <color name="brand_tile">#0A3D2C</color>
+    <color name="brand_accent">#7CB98A</color>
+
+    <!-- Ikona -->
+    <color name="ic_launcher_background">#0E4D3A</color>
+</resources>
