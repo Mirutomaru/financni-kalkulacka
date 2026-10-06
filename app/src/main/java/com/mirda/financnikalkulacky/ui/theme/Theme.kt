@@ -1,9 +1,17 @@
 package com.mirda.financnikalkulacky.ui.theme
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.mirda.financnikalkulacky.R
 
 /** Brand barvy — přírodní tmavě zelená dle zadání (#0E4D3A). */
 val BrandGreen = Color(0xFF0E4D3A)
@@ -27,5 +35,15 @@ private val GreenColorScheme = darkColorScheme(
 
 @Composable
 fun FinancniKalkulackyTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = GreenColorScheme, content = content)
+    MaterialTheme(colorScheme = GreenColorScheme) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(R.drawable.bg_finance),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+            content()
+        }
+    }
 }
