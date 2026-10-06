@@ -1,0 +1,87 @@
+package com.mirda.financnikalkulacky.calculators.housing
+import kotlin.math.ceil
+import kotlin.math.pow
+import kotlin.math.ln
+
+/** Výsledek základní anuitní hypotéky. */
+data class MortgageResult(
+    val monthlyPayment: Double,   // A — měsíční splátka
+    val totalPaid: Double,        // T = A · m
+    val totalInterest: Double,    // I = T − L
+)
+
+/** Výsledek mimořádné splátky. */
+data class ExtraPaymentResult(
+    val newMonthlyPayment: Double,   // při variantě B (snížení splátky)
+    val monthsShortened: Int,        // při variantě A (zkrácení doby)
+    val interestSaved: Double,       // úspora na úrocích oproti původnímu plánu
+)
+
+/** Výsledek refinancování. */
+data class RefinanceResult(
+    val oldPayment: Double,
+    val newPayment: Double,
+    val grossSavings: Double,     // (A_stara − A_nova) · m
+    val netSavings: Double,       // hrubá úspora − poplatky
+    val breakEvenMonths: Int,     // C_ref / (A_stara − A_nova)
+)
+
+object MortgageCalculator {
+    /** Měsíční anuitní splátka pro přesný počet měsíců. r_a v %. */
+    fun monthlyPayment(loan: Double, annualRatePct: Double, months: Int): Double {
+        val m = months.coerceAtLeast(1)
+        val r = annualRatePct / 100.0 / 12.0
+        if (r == 0.0) return loan / m
+        val factor = (1.0 + r).pow(m.toDouble())
+        return loan * r * factor / (factor - 1.0)
+    }
+
+
+    /** Základní výpočet: splátka, celkem zaplaceno, úroky. */
+    fun calculate(loan: Double, annualRatePct: Double, years: Int): MortgageResult {
+        val m = (years * 12).coerceAtLeast(1)
+        val a = monthlyPayment(loan, annualRatePct, m)
+        val total = a * m
+        return MortgageResult(a, total, total - loan)
+    }
+
+    /** Mimořádná splátka E. goalB=true → snížit splátku (stejný počet měsíců), jinak zkrátit dobu. */
+    fun extraPayment(loan: Double, annualRatePct: Double, remainingMonths: Int, extra: Double, goalB: Boolean): ExtraPaymentResult {
+        val r = annualRatePct / 100.0 / 12.0
+        val m = remainingMonths.coerceAtLeast(1)
+        val aOld = monthlyPayment(loan, annualRatePct, m)
+        val newLoan = (loan - extra).coerceAtLeast(0.0)
+        if (goalB) {
+            // Stejný počet měsíců, nižší splátka
+            val aNew = monthlyPayment(newLoan, annualRatePct, m)
+            val oldInterest = aOld * m - loan
+            val newInterest = aNew * m + extra - loan
+            return ExtraPaymentResult(aNew, 0, (oldInterest - newInterest).coerceAtLeast(0.0))
+        }
+        // Stejná splátka, zkrácení doby: m_nove = -ln(1 − r·L_nova/A) / ln(1 + r)
+        val newLoan2 = (loan - extra).coerceAtLeast(0.0)
+        var mNew = 0
+        if (newLoan2 <= 0.0) {
+            mNew = 0
+        } else if (r == 0.0) {
+            mNew = ceil(newLoan2 / aOld).toInt()
+        } else {
+            val arg = 1.0 - r * newLoan2 / aOld
+            mNew = if (arg <= 0.0) m else ceil(-ln(arg) / ln(1.0 + r)).toInt().coerceAtMost(m)
+        }
+        val oldInterest = aOld * m - loan
+        val newInterest = aOld * mNew + extra - loan
+        return ExtraPaymentResult(aOld, (m - mNew).coerceAtLeast(0), (oldInterest - newInterest).coerceAtLeast(0.0))
+    }
+
+    /** Refinancování: srovnání splátek a čistá úspora včetně bodu zvratu. */
+    fun refinance(loan: Double, remainingMonths: Int, oldRatePct: Double, newRatePct: Double, fees: Double): RefinanceResult {
+        val m = remainingMonths.coerceAtLeast(1)
+        val aOld = monthlyPayment(loan, oldRatePct, m)
+        val aNew = monthlyPayment(loan, newRatePct, m)
+        val gross = (aOld - aNew) * m
+        val net = gross - fees
+        val breakEven = if (aOld > aNew) ceil(fees / (aOld - aNew)).toInt() else 0
+        return RefinanceResult(aOld, aNew, gross, net, breakEven)
+    }
+}
