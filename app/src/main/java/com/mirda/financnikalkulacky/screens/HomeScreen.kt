@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Insights
@@ -59,7 +61,7 @@ fun HomeScreen(onCategoryClick: (String) -> Unit, onCalcClick: (String) -> Unit)
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(modifier = Modifier.width(300.dp)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Spacer(Modifier.height(12.dp))
                     Text(stringResource(R.string.drawer_calculators), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     CATEGORIES.forEach { cat ->
