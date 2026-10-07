@@ -39,6 +39,8 @@ data class CalcSpec(
     val title: String,
     val description: String,
     val icon: ImageVector,
+    /** Volitelná podskupina v rámci kategorie (nadpis na Level 2). */
+    val group: String = "",
     val fields: List<Field>,
     val toggles: List<ToggleField> = emptyList(),
     /** Volitelné grafy (payoff křivka apod.) — volané při každém přepočtu. */

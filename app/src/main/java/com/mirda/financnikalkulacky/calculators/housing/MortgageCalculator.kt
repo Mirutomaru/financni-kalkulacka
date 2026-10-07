@@ -26,11 +26,13 @@ data class RefinanceResult(
     val breakEvenMonths: Int,     // C_ref / (A_stara − A_nova)
 )
 
-/** Roční bod amortizačního plánu (payoff křivka). */
+/** Roční bod amortizačního plánu (payoff křivka + splátkový kalendář). */
 data class YearlyAmortization(
     val year: Int,                    // rok 1..years
     val remainingPrincipal: Double,   // zůstatek jistiny na konci roku
     val cumulativeInterest: Double,   // kumulované úroky do konce roku
+    val yearlyInterest: Double = 0.0, // úroky zaplacené v daném roce
+    val yearlyPrincipal: Double = 0.0,// jistina splacená v daném roce
 )
 
 object MortgageCalculator {
@@ -59,6 +61,8 @@ object MortgageCalculator {
         val r = annualRatePct / 100.0 / 12.0
         var balance = loan
         var cumInterest = 0.0
+        var yearInterest = 0.0
+        var yearPrincipal = 0.0
         val out = mutableListOf<YearlyAmortization>()
         for (month in 1..m) {
             val interest = balance * r
@@ -66,11 +70,32 @@ object MortgageCalculator {
             balance -= principal
             if (balance < 0.0) balance = 0.0
             cumInterest += interest
+            yearInterest += interest
+            yearPrincipal += principal
             if (month % 12 == 0 || month == m) {
-                out.add(YearlyAmortization(month / 12 + (if (month % 12 == 0) 0 else 1), balance, cumInterest))
+                out.add(YearlyAmortization(month / 12 + (if (month % 12 == 0) 0 else 1), balance, cumInterest, yearInterest, yearPrincipal))
+                yearInterest = 0.0
+                yearPrincipal = 0.0
             }
         }
         return out
+    }
+
+    /** RPSN (roční procentuální sazba nákladů) — efektivní roční úrok z měsíční anuity. */
+    fun rpsn(loan: Double, annualRatePct: Double, years: Int): Double {
+        val m = (years * 12).coerceAtLeast(1)
+        val a = monthlyPayment(loan, annualRatePct, m)
+        if (a <= 0.0 || loan <= 0.0) return 0.0
+        // Newtonova iterace po měsíční sazbě r takové, že PV splátek = loan
+        var lo = 0.0
+        var hi = 1.0 / 12.0
+        repeat(60) {
+            val mid = (lo + hi) / 2.0
+            val factor = if (mid == 0.0) 1.0 else (1.0 + mid).pow(m.toDouble())
+            val pv = a * (factor - 1.0) / (mid * factor)
+            if (pv > loan) lo = mid else hi = mid
+        }
+        return ((lo + hi) / 2.0) * 12.0 * 100.0
     }
 
     /** Mimořádná splátka E. goalB=true → snížit splátku (stejný počet měsíců), jinak zkrátit dobu. */

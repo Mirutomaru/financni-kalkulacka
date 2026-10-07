@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.mirda.financnikalkulacky.components.TileCard
 import com.mirda.financnikalkulacky.ui.model.Category
 
-/** Level 2 — hub kategorie: dlaždice podkalkulaček. */
+/** Level 2 — hub kategorie: dlaždice podkalkulaček, seskupené podle podskupin. */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryScreen(category: Category, onBack: () -> Unit, onOpenCalc: (String) -> Unit) {
@@ -48,8 +48,20 @@ fun CategoryScreen(category: Category, onBack: () -> Unit, onOpenCalc: (String) 
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            category.specs.forEach { spec ->
-                TileCard(icon = spec.icon, title = spec.title, description = spec.description) { onOpenCalc(spec.id) }
+            // Seskupit specy podle podskupiny (zachovat pořadí)
+            val grouped = category.specs.groupBy { it.group }
+            grouped.forEach { (groupName, specs) ->
+                if (groupName.isNotEmpty()) {
+                    Text(
+                        text = groupName,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White.copy(alpha = 0.75f),
+                        modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
+                    )
+                }
+                specs.forEach { spec ->
+                    TileCard(icon = spec.icon, title = spec.title, description = spec.description) { onOpenCalc(spec.id) }
+                }
             }
         }
     }
