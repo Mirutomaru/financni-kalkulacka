@@ -1,6 +1,7 @@
 package com.mirda.financnikalkulacky.ui.theme
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,12 @@ fun FinancniKalkulackyTheme(content: @Composable () -> Unit) {
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
+            )
+            // Jemné ztmavení nad obrázkem — bílé písmo je čitelné i na světlých partiích.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f)),
             )
             content()
         }

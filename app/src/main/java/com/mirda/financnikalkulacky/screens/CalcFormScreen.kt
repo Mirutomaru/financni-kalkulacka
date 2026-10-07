@@ -23,6 +23,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.mirda.financnikalkulacky.components.fmtNum
 import com.mirda.financnikalkulacky.ui.model.CalcSpec
+import com.mirda.financnikalkulacky.ui.theme.BrandGreenDark
 
 /** Level 3 — formulář kalkulačky: slidery, přepínače a živé výsledky. */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -45,9 +47,11 @@ fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit) {
     val results = remember(values, toggles) { spec.compute(values, toggles) }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text(text = spec.title) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zpět")
@@ -98,7 +102,7 @@ fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit) {
                 }
             }
 
-            Card(shape = RoundedCornerShape(16.dp), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)) {
+            Card(shape = RoundedCornerShape(16.dp), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BrandGreenDark)) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(text = "Výsledek", style = MaterialTheme.typography.titleMedium, color = Color.White)
                     results.forEach { r ->
