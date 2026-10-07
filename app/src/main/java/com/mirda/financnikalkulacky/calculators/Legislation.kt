@@ -51,6 +51,13 @@ object Legislation {
     // DPP / DPČ — měsíční limit pro vznik odvodů (10 % průměrné mzdy, 2026)
     const val DPC_CONTRIBUTION_LIMIT = 4_100.0
 
+    // Rodinné události — porodné (jednorázově, 2026)
+    const val PORODNE_FIRST = 13_000.0   // první dítě
+    const val PORODNE_NEXT = 30_000.0    // druhé a další děti
+
+    // Konec života — státní pohřebné (jednorázová dávka, 2026)
+    const val POHRBENE_BENEFIT = 15_000.0
+
     // Podpora v nezaměstnanosti — měsíce podpůrné doby podle věku
     fun unemploymentMonths(age: Int): Int = when {
         age < 50 -> 5
