@@ -10,8 +10,11 @@ import com.mirda.financnikalkulacky.calculators.housing.BuyVsRentCalculator
 import com.mirda.financnikalkulacky.calculators.housing.MortgageCalculator
 import com.mirda.financnikalkulacky.calculators.housing.RentalYieldCalculator
 import com.mirda.financnikalkulacky.components.fmtCzk
+import androidx.compose.ui.graphics.Color
 import com.mirda.financnikalkulacky.ui.model.CalcResult
 import com.mirda.financnikalkulacky.ui.model.CalcSpec
+import com.mirda.financnikalkulacky.ui.model.ChartPoint
+import com.mirda.financnikalkulacky.ui.model.ChartSeries
 import com.mirda.financnikalkulacky.ui.model.Field
 import com.mirda.financnikalkulacky.ui.model.ToggleField
 
@@ -28,6 +31,15 @@ val HOUSING_SPECS: List<CalcSpec> = listOf(
             Field("rate", "Roční úroková sazba", 0.5f, 12f, 0.1f, 6f, "%"),
             Field("years", "Doba splácení", 5f, 40f, 1f, 30f, "let"),
         ),
+        charts = { v, _ ->
+            val plan = MortgageCalculator.yearlyAmortization(v["loan"]!!.toDouble(), v["rate"]!!.toDouble(), v["years"]!!.toInt())
+            listOf(
+                ChartSeries("Zůstatek jistiny", Color(0xFF7CB98A),
+                    listOf(ChartPoint(0f, v["loan"]!!.toDouble())) + plan.map { ChartPoint(it.year.toFloat(), it.remainingPrincipal) }),
+                ChartSeries("Kumulované úroky", Color(0xFFFFC96B),
+                    plan.map { ChartPoint(it.year.toFloat(), it.cumulativeInterest) }),
+            )
+        },
     ) { v, _ ->
         val r = MortgageCalculator.calculate(v["loan"]!!.toDouble(), v["rate"]!!.toDouble(), v["years"]!!.toInt())
         listOf(

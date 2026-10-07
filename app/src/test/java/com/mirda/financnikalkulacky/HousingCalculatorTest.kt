@@ -52,4 +52,29 @@ class HousingCalculatorTest {
         assertTrue(r.buyNetWorth > 0.0)
         assertTrue(r.rentNetWorth > 0.0)
     }
+
+    @Test fun `amortizacni plan — zbytek klesa a konci na nule`() {
+        val plan = MortgageCalculator.yearlyAmortization(2_000_000.0, 5.0, 30)
+        assertEquals(30, plan.size)
+        // Po prvním roce zůstatek klesne pod původní jistinu (cca 1,97 mil)
+        assertTrue(plan[0].remainingPrincipal < 2_000_000.0)
+        assertTrue(plan[0].remainingPrincipal > 1_900_000.0)
+        // Zůstatek klesá monotónně a na konci je ~0 (zaokrouhlení na centy)
+        for (i in 1 until plan.size) {
+            assertTrue(plan[i].remainingPrincipal <= plan[i - 1].remainingPrincipal + 1e-6)
+        }
+        assertTrue(plan.last().remainingPrincipal < 1.0)
+        // Kumulované úroky rostou a končí celkovými úroky (cca 1,865 mil)
+        for (i in 1 until plan.size) {
+            assertTrue(plan[i].cumulativeInterest > plan[i - 1].cumulativeInterest)
+        }
+        val r = MortgageCalculator.calculate(2_000_000.0, 5.0, 30)
+        assertEquals(r.totalInterest, plan.last().cumulativeInterest, 1.0)
+    }
+
+    @Test fun `amortizacni plan — kratsi hypoteka`() {
+        val plan = MortgageCalculator.yearlyAmortization(1_000_000.0, 4.0, 5)
+        assertEquals(5, plan.size)
+        assertTrue(plan.last().remainingPrincipal < 1.0)
+    }
 }

@@ -26,6 +26,13 @@ data class RefinanceResult(
     val breakEvenMonths: Int,     // C_ref / (A_stara − A_nova)
 )
 
+/** Roční bod amortizačního plánu (payoff křivka). */
+data class YearlyAmortization(
+    val year: Int,                    // rok 1..years
+    val remainingPrincipal: Double,   // zůstatek jistiny na konci roku
+    val cumulativeInterest: Double,   // kumulované úroky do konce roku
+)
+
 object MortgageCalculator {
     /** Měsíční anuitní splátka pro přesný počet měsíců. r_a v %. */
     fun monthlyPayment(loan: Double, annualRatePct: Double, months: Int): Double {
@@ -43,6 +50,27 @@ object MortgageCalculator {
         val a = monthlyPayment(loan, annualRatePct, m)
         val total = a * m
         return MortgageResult(a, total, total - loan)
+    }
+
+    /** Roční amortizační plán: zůstatek jistiny + kumulované úroky na konci každého roku. */
+    fun yearlyAmortization(loan: Double, annualRatePct: Double, years: Int): List<YearlyAmortization> {
+        val m = (years * 12).coerceAtLeast(1)
+        val a = monthlyPayment(loan, annualRatePct, m)
+        val r = annualRatePct / 100.0 / 12.0
+        var balance = loan
+        var cumInterest = 0.0
+        val out = mutableListOf<YearlyAmortization>()
+        for (month in 1..m) {
+            val interest = balance * r
+            val principal = a - interest
+            balance -= principal
+            if (balance < 0.0) balance = 0.0
+            cumInterest += interest
+            if (month % 12 == 0 || month == m) {
+                out.add(YearlyAmortization(month / 12 + (if (month % 12 == 0) 0 else 1), balance, cumInterest))
+            }
+        }
+        return out
     }
 
     /** Mimořádná splátka E. goalB=true → snížit splátku (stejný počet měsíců), jinak zkrátit dobu. */

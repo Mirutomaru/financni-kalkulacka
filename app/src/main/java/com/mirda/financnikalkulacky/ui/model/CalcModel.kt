@@ -23,6 +23,16 @@ data class ToggleField(
 /** Jeden výstupní řádek výsledku. */
 data class CalcResult(val label: String, val value: String)
 
+/** Bod grafu (x = osa vpravo dole, y = hodnota). */
+data class ChartPoint(val x: Float, val y: Double)
+
+/** Série pro line chart — jedna křivka. */
+data class ChartSeries(
+    val label: String,
+    val color: androidx.compose.ui.graphics.Color,
+    val points: List<ChartPoint>,
+)
+
 /** Specifikace jedné kalkulačky pro generický formulář (Level 3). */
 data class CalcSpec(
     val id: String,
@@ -31,6 +41,8 @@ data class CalcSpec(
     val icon: ImageVector,
     val fields: List<Field>,
     val toggles: List<ToggleField> = emptyList(),
+    /** Volitelné grafy (payoff křivka apod.) — volané při každém přepočtu. */
+    val charts: ((Map<String, Float>, Map<String, Boolean>) -> List<ChartSeries>)? = null,
     val compute: (Map<String, Float>, Map<String, Boolean>) -> List<CalcResult>,
 )
 

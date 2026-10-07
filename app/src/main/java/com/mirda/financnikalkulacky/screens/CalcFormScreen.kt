@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mirda.financnikalkulacky.components.LineChart
 import com.mirda.financnikalkulacky.components.fmtNum
 import com.mirda.financnikalkulacky.ui.model.CalcSpec
 import com.mirda.financnikalkulacky.ui.theme.BrandGreenDark
@@ -98,6 +99,18 @@ fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit) {
                     ) {
                         Text(text = t.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                         Switch(checked = toggles[t.key] == true, onCheckedChange = { c -> toggles = toggles.toMutableMap().apply { put(t.key, c) } })
+                    }
+                }
+            }
+
+            spec.charts?.let { chartsFn ->
+                val series = remember(values, toggles) { runCatching { chartsFn(values, toggles) }.getOrDefault(emptyList()) }
+                if (series.isNotEmpty()) {
+                    Card(shape = RoundedCornerShape(16.dp)) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(text = "Graf", style = MaterialTheme.typography.titleMedium)
+                            LineChart(series = series, height = 200.dp)
+                        }
                     }
                 }
             }

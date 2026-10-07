@@ -1,46 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Finanční kalkulačky</string>
-
-    <!-- Horní lišta -->
     <string name="menu_open">Otevřít menu</string>
     <string name="action_settings">Nastavení</string>
 
-    <!-- Boční menu -->
+    <!-- Drawer -->
     <string name="drawer_calculators">Kalkulačky</string>
-    <string name="drawer_stats">Statistika vývoje</string>
+    <string name="drawer_stats">Vývojové statistiky</string>
     <string name="drawer_feedback">Váš názor</string>
     <string name="drawer_privacy">Ochrana osobních údajů</string>
 
-    <!-- Kalkulačky (bubliny) -->
-    <string name="calc_cista_mzda">Čistá mzda</string>
-    <string name="calc_nemocenska">Nemocenská</string>
-    <string name="calc_sporeni">Spoření</string>
-    <string name="calc_hypoteka">Hypotéka</string>
-    <string name="calc_osvc">OSVČ</string>
-    <string name="calc_penze">Penze</string>
-    <string name="calc_inflace">Inflace</string>
-    <string name="calc_investice">Investice</string>
+    <!-- Dialogy -->
+    <string name="stats_text">Aplikace běží ve vývojové verzi. Žádné reklamní sítě, žádné analytiky — vše se počítá přímo na vašem telefonu.</string>
+    <string name="feedback_text">Napište nám, co by mělo být v aplikaci další. Děkujeme za zpětnou vazbu!</string>
+    <string name="privacy_text">Všechny výpočty probíhají lokálně na vašem zařízení. Žádné údaje se neodesílají na server.</string>
 
-    <!-- Obrazovka kalkulačky -->
-    <string name="back">Zpět</string>
-    <string name="coming_soon_title">Vývoj probíhá</string>
-    <string name="coming_soon_text">Tato kalkulačka je právě ve vývoji. Zkuste mezitím jinou.</string>
-
-    <!-- Čistá mzda -->
-    <string name="mzda_label_gross">Hrubá mzda (Kč / měs.)</string>
-    <string name="mzda_label_children">Počet dětí do 15 let</string>
-    <string name="mzda_result_net">Čistá mzda na ruce</string>
-    <string name="mzda_row_tax">Daň z příjmů</string>
-    <string name="mzda_row_social">Sociální pojištění (zaměstnanec)</string>
-    <string name="mzda_row_health">Zdravotní pojištění</string>
-    <string name="mzda_note">Zjednodušený odhad — bez zvláštních slev a bonusů. Přesnou mzdu určí zaměstnavatel.</string>
-    <string name="mzda_error_salary">Zadej hrubou mzdu</string>
-
-    <!-- O aplikaci / feedback -->
-    <string name="about_title">Finanční kalkulačky</string>
+    <!-- Info -->
+    <string name="about_title">O aplikaci</string>
     <string name="ok">OK</string>
-    <string name="feedback_text">Děkujeme za použití aplikace! Máte náměty na zlepšení? Napište nám.</string>
-    <string name="privacy_text">Aplikace běží offline — vaše údaje se nikam neposílají. Ukládáme pouze zadané hodnoty pro pohodlný návrat.\n\nAplikaci vypracoval Mgr. Miroslav Matúš DiS.\nEmail: mirdamatus@gmail.com</string>
-    <string name="stats_text">Vývoj průměrné mzdy a inflace — brzy zde.</string>
 </resources>
