@@ -8,11 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import com.mirda.financnikalkulacky.screens.CALCULATORS
-import com.mirda.financnikalkulacky.screens.CleanSalaryScreen
-import com.mirda.financnikalkulacky.screens.ComingSoonScreen
+import com.mirda.financnikalkulacky.screens.CalcFormScreen
+import com.mirda.financnikalkulacky.screens.CategoryScreen
 import com.mirda.financnikalkulacky.screens.HomeScreen
+import com.mirda.financnikalkulacky.ui.specs.CATEGORIES
 import com.mirda.financnikalkulacky.ui.theme.FinancniKalkulackyTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,14 +25,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** Kořenová navigace: Home (kategorie) → Category (dlaždice) → CalcForm. */
 @Composable
 fun AppRoot() {
-    var selected by remember { mutableStateOf<String?>(null) }
-    val item = CALCULATORS.firstOrNull { it.id == selected }
+    var category by remember { mutableStateOf<String?>(null) }
+    var calcId by remember { mutableStateOf<String?>(null) }
+
+    val cat = CATEGORIES.firstOrNull { it.id == category }
+    val spec = cat?.specs?.firstOrNull { it.id == calcId } ?:
+        CATEGORIES.flatMap { c -> c.specs }.firstOrNull { s -> s.id == calcId }
 
     when {
-        item == null -> HomeScreen(onCalculatorClick = { selected = it })
-        item.id == "mzda" -> CleanSalaryScreen(onBack = { selected = null })
-        else -> ComingSoonScreen(title = stringResource(item.labelRes), onBack = { selected = null })
+        spec != null -> CalcFormScreen(spec = spec, onBack = { calcId = null })
+        cat != null -> CategoryScreen(category = cat, onBack = { category = null }, onOpenCalc = { calcId = it })
+        else -> HomeScreen(
+            onCategoryClick = { c -> category = c; calcId = null },
+            onCalcClick = { c -> calcId = c },
+        )
     }
 }
