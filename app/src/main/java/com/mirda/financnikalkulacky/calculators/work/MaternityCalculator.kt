@@ -1,6 +1,7 @@
 package com.mirda.financnikalkulacky.calculators.work
 
 import com.mirda.financnikalkulacky.calculators.Legislation
+import com.mirda.financnikalkulacky.calculators.YearParams
 
 /** Výsledek výpočtu mateřské (PPM) a rodičovského příspěvku. */
 data class MaternityResult(
@@ -12,11 +13,11 @@ data class MaternityResult(
 )
 
 object MaternityCalculator {
-    /** Redukovaný DVZ (stejné hranice jako nemocenská). */
-    fun reduceDailyBase(daily: Double): Double {
-        val l1 = Legislation.SICK_LIMIT_1
-        val l2 = Legislation.SICK_LIMIT_2
-        val l3 = Legislation.SICK_LIMIT_3
+    /** Redukovaný DVZ (stejné hranice jako nemocenská, dle roku). */
+    fun reduceDailyBase(daily: Double, p: YearParams = YearParams.YEAR_2026): Double {
+        val l1 = p.sickLimit1
+        val l2 = p.sickLimit2
+        val l3 = p.sickLimit3
         val part1 = minOf(daily, l1) * 0.9
         val part2 = (minOf(daily, l2) - l1).coerceAtLeast(0.0) * 0.6
         val part3 = (minOf(daily, l3) - l2).coerceAtLeast(0.0) * 0.3
@@ -27,10 +28,11 @@ object MaternityCalculator {
      * @param grossMonthly hrubá měsíční mzda matky/otce (Kč)
      * @param childAgeYears věk dítěte, do kterého se má rodičovská čerpat (2/3/4)
      * @param totalParentalBenefit celková státem stanovená částka rodičovského příspěvku na dítě (Kč)
+     * @param p roční parametry (redukční hranice) — výchozí aktuální rok
      */
-    fun calculate(grossMonthly: Double, totalParentalBenefit: Double, childAgeYears: Int): MaternityResult {
+    fun calculate(grossMonthly: Double, totalParentalBenefit: Double, childAgeYears: Int, p: YearParams = YearParams.YEAR_2026): MaternityResult {
         val dailyRaw = grossMonthly / 30.0
-        val dailyReduced = reduceDailyBase(dailyRaw)
+        val dailyReduced = reduceDailyBase(dailyRaw, p)
 
         // PPM — 70 % redukovaného DVZ za každý kalendářní den, 28 týdnů (196 dní)
         val ppmTotal28w = dailyReduced * 0.70 * 196.0

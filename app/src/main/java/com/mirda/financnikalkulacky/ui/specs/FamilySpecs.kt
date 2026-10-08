@@ -91,6 +91,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
             Field("debts", "Společné dluhy (hypotéka…)", 0f, 5_000_000f, 10_000f, 1_000_000f, "Kč"),
             Field("partnerSharePct", "Podíl druhého partnera", 0f, 100f, 5f, 50f, "%"),
         ),
+        related = listOf("vyzivne"),
     ) { v, _ ->
         val r = DivorcePropertySplitCalculator.calculate(
             assets = v["assets"]!!.toDouble(),
@@ -115,6 +116,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
             Field("children", "Počet dětí", 1f, 5f, 1f, 1f, ""),
             Field("avgWage", "Průměrná mzda (rok)", 20_000f, 60_000f, 1_000f, 38_000f, "Kč"),
         ),
+        related = listOf("rozvod-sjm"),
     ) { v, _ ->
         val c = v["children"]!!.toInt()
         val r = ChildSupportCalculator.calculate(v["netIncome"]!!.toDouble(), c, v["avgWage"]!!.toDouble())
@@ -139,6 +141,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
         toggles = listOf(
             ToggleField("isSecondOrMoreChild", "Druhé a další dítě (vyšší porodné)"),
         ),
+        related = listOf("mateřska", "osetrowne"),
     ) { v, t ->
         val r = BabyCostCalculator.calculate(
             oneTimeCost = v["oneTimeCost"]!!.toDouble(),
@@ -211,6 +214,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
             Field("flowers", "Květiny a věnce", 1_000f, 10_000f, 500f, 3_000f, "Kč"),
             Field("other", "Ostatní (inzerce, hostina…)", 0f, 20_000f, 1_000f, 4_000f, "Kč"),
         ),
+        related = listOf("pohrebne"),
     ) { v, _ ->
         val r = FuneralCostCalculator.calculate(
             coffin = v["coffin"]!!.toDouble(),
@@ -253,6 +257,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
             Field("estateValue", "Hodnota majetku po zemřelém", 100_000f, 30_000_000f, 10_000f, 6_000_000f, "Kč"),
             Field("propertiesCount", "Počet nemovitostí v dědictví", 0f, 10f, 1f, 2f, ""),
         ),
+        related = listOf("povinni-dil", "dar-vs-dedictvi"),
     ) { v, _ ->
         val r = InheritanceProceedingsCalculator.calculate(v["estateValue"]!!.toDouble(), v["propertiesCount"]!!.toInt())
         listOf(
@@ -295,6 +300,7 @@ val FAMILY_SPECS: List<CalcSpec> = listOf(
         toggles = listOf(
             ToggleField("isCloseRelative", "Nejbližší příbuzný (osvobození 8 000 Kč)"),
         ),
+        related = listOf("dedicke-rijeni"),
     ) { v, t ->
         val r = GiftVsInheritanceCalculator.calculate(
             assetValue = v["assetValue"]!!.toDouble(),

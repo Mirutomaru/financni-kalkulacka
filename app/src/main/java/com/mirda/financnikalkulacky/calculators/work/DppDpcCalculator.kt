@@ -1,6 +1,7 @@
 package com.mirda.financnikalkulacky.calculators.work
 
 import com.mirda.financnikalkulacky.calculators.Legislation
+import com.mirda.financnikalkulacky.calculators.YearParams
 
 /** Výsledek výpočtu DPP/DPČ. */
 data class DppResult(
@@ -16,9 +17,10 @@ object DppDpcCalculator {
     /**
      * @param grossMonthly hrubá měsíční odměna (Kč)
      * @param hasTaxDeclaration „růžový formulář“ — ano/ne
+     * @param p roční parametry (limit pro vznik odvodů) — výchozí aktuální rok
      */
-    fun calculate(grossMonthly: Double, hasTaxDeclaration: Boolean): DppResult {
-        val fullContributions = grossMonthly > Legislation.DPC_CONTRIBUTION_LIMIT
+    fun calculate(grossMonthly: Double, hasTaxDeclaration: Boolean, p: YearParams = YearParams.YEAR_2026): DppResult {
+        val fullContributions = grossMonthly > p.dpcContributionLimit
 
         var social = 0.0
         var health = 0.0

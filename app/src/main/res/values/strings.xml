@@ -18,4 +18,11 @@
     <!-- Info -->
     <string name="about_title">O aplikaci</string>
     <string name="ok">OK</string>
+
+    <!-- Kalkulačka (Level 3) -->
+    <string name="calc_related_header">Související kalkulačky</string>
+    <string name="calc_disclaimer">Orientační výpočet — pro konečné rozhodnutí se poraďte s odborníkem. Sazby a limity odpovídají aktuální legislativě.</string>
+
+    <!-- Životní etapy (Level 1) -->
+    <string name="life_stages_header">Podle životní etapy</string>
 </resources>

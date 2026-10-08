@@ -1,6 +1,7 @@
 package com.mirda.financnikalkulacky.calculators.work
 
 import com.mirda.financnikalkulacky.calculators.Legislation
+import com.mirda.financnikalkulacky.calculators.YearParams
 
 /** Výsledek výpočtu nemocenské a náhrady mzdy. */
 data class SickLeaveResult(
@@ -13,11 +14,11 @@ data class SickLeaveResult(
 )
 
 object SickLeaveCalculator {
-    /** Redukovaný denní vyměřovací základ dle 3 redukčních hranic. */
-    fun reduceDailyBase(daily: Double): Double {
-        val l1 = Legislation.SICK_LIMIT_1
-        val l2 = Legislation.SICK_LIMIT_2
-        val l3 = Legislation.SICK_LIMIT_3
+    /** Redukovaný denní vyměřovací základ dle 3 redukčních hranic daného roku. */
+    fun reduceDailyBase(daily: Double, p: YearParams = YearParams.YEAR_2026): Double {
+        val l1 = p.sickLimit1
+        val l2 = p.sickLimit2
+        val l3 = p.sickLimit3
         val part1 = minOf(daily, l1) * 0.9
         val part2 = (minOf(daily, l2) - l1).coerceAtLeast(0.0) * 0.6
         val part3 = (minOf(daily, l3) - l2).coerceAtLeast(0.0) * 0.3
@@ -27,10 +28,11 @@ object SickLeaveCalculator {
     /**
      * @param grossMonthlyAvg průměrný hrubý měsíční příjem za předchozí 4 čtvrtletí (Kč)
      * @param sickDays celkový počet kalendářních dnů pracovní neschopnosti
+     * @param p roční parametry (redukční hranice) — výchozí aktuální rok
      */
-    fun calculate(grossMonthlyAvg: Double, sickDays: Int): SickLeaveResult {
+    fun calculate(grossMonthlyAvg: Double, sickDays: Int, p: YearParams = YearParams.YEAR_2026): SickLeaveResult {
         val dailyRaw = grossMonthlyAvg / 30.0
-        val dailyReduced = reduceDailyBase(dailyRaw)
+        val dailyReduced = reduceDailyBase(dailyRaw, p)
 
         // Prvních 14 dní — náhrada mzdy od zaměstnavatele (pracovní dny ≈ 2/3 kalendářních)
         val firstDays = minOf(sickDays, 14)

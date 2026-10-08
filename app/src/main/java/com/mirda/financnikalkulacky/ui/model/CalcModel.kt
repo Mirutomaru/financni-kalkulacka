@@ -43,6 +43,8 @@ data class CalcSpec(
     val group: String = "",
     val fields: List<Field>,
     val toggles: List<ToggleField> = emptyList(),
+    /** ID souvisejících kalkulaček — zobrazí se jako chips pod výsledkem. */
+    val related: List<String> = emptyList(),
     /** Volitelné grafy (payoff křivka apod.) — volané při každém přepočtu. */
     val charts: ((Map<String, Float>, Map<String, Boolean>) -> List<ChartSeries>)? = null,
     val compute: (Map<String, Float>, Map<String, Boolean>) -> List<CalcResult>,

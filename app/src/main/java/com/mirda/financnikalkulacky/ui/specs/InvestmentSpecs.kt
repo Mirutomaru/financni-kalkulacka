@@ -61,6 +61,7 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
             Field("rate", "Roční zhodnocení", 0f, 15f, 0.1f, 6f, "%"),
             Field("years", "Doba spoření", 1f, 40f, 1f, 20f, "let"),
         ),
+        related = listOf("fire", "dps", "statni-duchod"),
     ) { v, _ ->
         val r = InvestmentCalculator.futureValue(v["principal"]!!.toDouble(), v["pmt"]!!.toDouble(), v["rate"]!!.toDouble(), v["years"]!!.toInt())
         listOf(
@@ -404,6 +405,7 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
             Field("pmt", "Měsíční úložka", 0f, 50_000f, 500f, 10_000f, "Kč"),
             Field("rate", "Roční zhodnocení", 0f, 15f, 0.1f, 6f, "%"),
         ),
+        related = listOf("sporeni", "duchodova-mezera"),
     ) { v, _ ->
         val fire = InvestmentCalculator.fireNumber(v["rent"]!!.toDouble(), v["swr"]!!.toDouble())
         val months = InvestmentCalculator.monthsToTarget(v["principal"]!!.toDouble(), v["pmt"]!!.toDouble(), v["rate"]!!.toDouble(), fire)
@@ -423,6 +425,7 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
             Field("avgIncome", "Průměrný hrubý příjem (měs.)", 10_000f, 200_000f, 1_000f, 35_000f, "Kč"),
             Field("yearsWorked", "Roky odpracování", 10f, 45f, 1f, 35f, "let"),
         ),
+        related = listOf("duchodova-mezera", "vek-odchodu"),
     ) { v, _ ->
         val r = StatePensionCalculator.calculate(v["avgIncome"]!!.toDouble(), v["yearsWorked"]!!.toInt())
         listOf(
@@ -483,6 +486,7 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
             Field("avgIncome", "Průměrný hrubý příjem (měs.)", 10_000f, 200_000f, 1_000f, 35_000f, "Kč"),
             Field("yearsWorked", "Roky odpracování", 10f, 45f, 1f, 35f, "let"),
         ),
+        related = listOf("statni-duchod", "annuita"),
     ) { v, _ ->
         val r = PensionGapCalculator.calculate(v["desiredMonthly"]!!.toDouble(), v["avgIncome"]!!.toDouble(), v["yearsWorked"]!!.toInt())
         listOf(
@@ -493,8 +497,8 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
     },
 
     CalcSpec(
-        id = "renta",
-        title = "Renta — jak dlouho vydrží úspory",
+        id = "annuita",
+        title = "Renta (anuita) — jak dlouho vydrží úspory",
         description = "Doba vyčerpání při daném výběru a výnosu.",
         icon = Icons.Filled.TimerOff,
         group = "Důchod a nezávislost",
@@ -503,6 +507,7 @@ val INVESTMENT_SPECS: List<CalcSpec> = listOf(
             Field("withdrawalMonthly", "Měsíční výběr", 0f, 30_000f, 500f, 15_000f, "Kč"),
             Field("annualReturnPct", "Roční výnos portfolia", 0f, 8f, 0.1f, 4f, "%"),
         ),
+        related = listOf("duchodova-mezera", "fire"),
     ) { v, _ ->
         val r = AnnuityCalculator.calculate(v["portfolio"]!!.toDouble(), v["withdrawalMonthly"]!!.toDouble(), v["annualReturnPct"]!!.toDouble())
         listOf(

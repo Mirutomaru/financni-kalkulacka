@@ -3,15 +3,16 @@ package com.mirda.financnikalkulacky.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -47,12 +48,13 @@ import androidx.compose.ui.unit.dp
 import com.mirda.financnikalkulacky.R
 import com.mirda.financnikalkulacky.components.BubbleButton
 import com.mirda.financnikalkulacky.ui.specs.CATEGORIES
+import com.mirda.financnikalkulacky.ui.specs.LIFE_STAGES
 import kotlinx.coroutines.launch
 
-/** Hlavní obrazovka — mřížka bublinových tlačítek kategorií (Level 1). */
+/** Hlavní obrazovka — bubliny kategorií (Level 1) + sekce životních etap. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onCategoryClick: (String) -> Unit, onCalcClick: (String) -> Unit) {
+fun HomeScreen(onCategoryClick: (String) -> Unit, onStageClick: (String) -> Unit, onCalcClick: (String) -> Unit) {
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     var dialog by remember { mutableStateOf<String?>(null) }
@@ -114,15 +116,27 @@ fun HomeScreen(onCategoryClick: (String) -> Unit, onCalcClick: (String) -> Unit)
                 )
             },
         ) { padding ->
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+            LazyColumn(
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
                 modifier = Modifier.fillMaxSize().padding(padding),
             ) {
-                items(CATEGORIES) { cat ->
-                    BubbleButton(icon = cat.icon, label = cat.name) { onCategoryClick(cat.id) }
+                // Kategorie — po dvou bublinách na řádek.
+                items(CATEGORIES.chunked(2)) { row ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        row.forEach { cat ->
+                            BubbleButton(icon = cat.icon, label = cat.name) { onCategoryClick(cat.id) }
+                        }
+                    }
+                }
+                item { Spacer(Modifier.height(28.dp)) }
+                // Životní etapy — alternativní navigace (Level 1 → etapa → dlaždice).
+                item {
+                    Text(stringResource(R.string.life_stages_header), style = MaterialTheme.typography.titleMedium, color = Color.White)
+                }
+                items(LIFE_STAGES) { stg ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        BubbleButton(icon = stg.icon, label = stg.name) { onStageClick(stg.id) }
+                    }
                 }
             }
         }

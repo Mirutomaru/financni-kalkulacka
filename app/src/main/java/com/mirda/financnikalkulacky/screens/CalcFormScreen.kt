@@ -1,8 +1,11 @@
 package com.mirda.financnikalkulacky.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,16 +36,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mirda.financnikalkulacky.R
 import com.mirda.financnikalkulacky.components.LineChart
 import com.mirda.financnikalkulacky.components.fmtNum
 import com.mirda.financnikalkulacky.ui.model.CalcSpec
+import com.mirda.financnikalkulacky.ui.specs.findSpec
 import com.mirda.financnikalkulacky.ui.theme.BrandGreenDark
 
 /** Level 3 — formulář kalkulačky: slidery, přepínače a živé výsledky. */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit) {
+fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit, onOpenCalc: (String) -> Unit = {}) {
     var values by remember { mutableStateOf(spec.fields.associate { it.key to it.default }) }
     var toggles by remember { mutableStateOf(spec.toggles.associate { it.key to false }) }
 
@@ -127,6 +134,33 @@ fun CalcFormScreen(spec: CalcSpec, onBack: () -> Unit) {
                     }
                 }
             }
+
+            // Související kalkulačky — klikací chips (Tip 3).
+            val relatedSpecs = remember { spec.related.mapNotNull { findSpec(it) } }
+            if (relatedSpecs.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = stringResource(R.string.calc_related_header), style = MaterialTheme.typography.titleSmall, color = Color.White.copy(alpha = 0.9f))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        relatedSpecs.forEach { rel ->
+                            Box(
+                                modifier = Modifier
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp))
+                                    .clickable(onClick = { onOpenCalc(rel.id) })
+                                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                            ) {
+                                Text(text = rel.title, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Upozornění na orientační výpočet (Tip 4).
+            Text(
+                text = stringResource(R.string.calc_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.6f),
+            )
         }
     }
 }

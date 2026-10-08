@@ -46,7 +46,9 @@ import com.mirda.financnikalkulacky.calculators.work.VacationCalculator
 import com.mirda.financnikalkulacky.calculators.work.VatCalculator
 import com.mirda.financnikalkulacky.calculators.work.WageValorizationCalculator
 import com.mirda.financnikalkulacky.calculators.work.WorkBenefitsCalculator
+import com.mirda.financnikalkulacky.calculators.YearParams
 import com.mirda.financnikalkulacky.components.fmtCzk
+import com.mirda.financnikalkulacky.components.fmtNum
 import com.mirda.financnikalkulacky.ui.model.CalcResult
 import com.mirda.financnikalkulacky.ui.model.CalcSpec
 import com.mirda.financnikalkulacky.ui.model.Field
@@ -64,6 +66,7 @@ val WORK_SPECS: List<CalcSpec> = listOf(
             Field("gross", "Hrubá měsíční mzda", 5_000f, 200_000f, 1_000f, 30_000f, "Kč"),
             Field("children", "Počet dětí", 0f, 5f, 1f, 0f, ""),
         ),
+        related = listOf("obraceda-mzda", "dpp", "prescasy", "dovolena"),
     ) { v, _ ->
         val r = SalaryCalculator.calculate(v["gross"]!!.toDouble(), v["children"]!!.toInt())
         listOf(
@@ -86,6 +89,7 @@ val WORK_SPECS: List<CalcSpec> = listOf(
             Field("targetNet", "Požadovaná čistá mzda", 5_000f, 200_000f, 1_000f, 30_000f, "Kč"),
             Field("children", "Počet dětí", 0f, 5f, 1f, 0f, ""),
         ),
+        related = listOf("mzda"),
     ) { v, _ ->
         val r = ReverseSalaryCalculator.calculate(v["targetNet"]!!.toDouble(), v["children"]!!.toInt())
         listOf(
@@ -197,13 +201,18 @@ val WORK_SPECS: List<CalcSpec> = listOf(
         fields = listOf(
             Field("gross", "Hrubá měsíční odměna", 1_000f, 100_000f, 500f, 10_000f, "Kč"),
         ),
-        toggles = listOf(ToggleField("decl", "Prohlášení o zdanění (růžový formulář)")),
+        toggles = listOf(
+            ToggleField("decl", "Prohlášení o zdanění (růžový formulář)"),
+            ToggleField("year2025", "Sazby roku 2025 — jinak aktuální 2026"),
+        ),
+        related = listOf("mzda", "osvc"),
     ) { v, t ->
-        val r = DppDpcCalculator.calculate(v["gross"]!!.toDouble(), t["decl"] == true)
+        val p = if (t["year2025"] == true) YearParams.YEAR_2025 else YearParams.YEAR_2026
+        val r = DppDpcCalculator.calculate(v["gross"]!!.toDouble(), t["decl"] == true, p)
         listOf(
             CalcResult("Čistě vyplacené", fmtCzk(r.netAmount)),
             CalcResult("Sražená daň", fmtCzk(r.taxWithheld)),
-            CalcResult("Odvody zaměstnance", if (r.fullContributions) fmtCzk(r.employeeSocial + r.employeeHealth) else "0 Kč (do limitu 4 100 Kč)"),
+            CalcResult("Odvody zaměstnance", if (r.fullContributions) fmtCzk(r.employeeSocial + r.employeeHealth) else "0 Kč (do limitu ${fmtNum(p.dpcContributionLimit)} Kč)"),
             CalcResult("Náklady firmy", fmtCzk(r.employerCost)),
         )
     },
@@ -241,10 +250,13 @@ val WORK_SPECS: List<CalcSpec> = listOf(
         toggles = listOf(
             ToggleField("band2", "Pásmo 2 (příjmy do 1 mil.) — jinak pásmo 1"),
             ToggleField("band3", "Pásmo 3 (příjmy nad 1 mil.)"),
+            ToggleField("year2025", "Sazby roku 2025 — jinak aktuální 2026"),
         ),
+        related = listOf("srovnanie-formy", "dph", "hodinova-sazba"),
     ) { v, t ->
         val band = if (t["band3"] == true) 3 else if (t["band2"] == true) 2 else 1
-        val r = OsvcCalculator.calculate(v["income"]!!.toDouble(), v["expense"]!!.toDouble(), band)
+        val p = if (t["year2025"] == true) YearParams.YEAR_2025 else YearParams.YEAR_2026
+        val r = OsvcCalculator.calculate(v["income"]!!.toDouble(), v["expense"]!!.toDouble(), band, p)
         listOf(
             CalcResult("Paušální daň (rok)", fmtCzk(r.flatTaxAnnual)),
             CalcResult("Běžný režim celkem (rok)", fmtCzk(r.regularTotalAnnual)),
@@ -424,8 +436,11 @@ val WORK_SPECS: List<CalcSpec> = listOf(
             Field("gross", "Průměrný hrubý příjem (měs.)", 5_000f, 200_000f, 1_000f, 30_000f, "Kč"),
             Field("days", "Dny pracovní neschopnosti", 1f, 180f, 1f, 45f, "dnů"),
         ),
-    ) { v, _ ->
-        val r = SickLeaveCalculator.calculate(v["gross"]!!.toDouble(), v["days"]!!.toInt())
+        toggles = listOf(ToggleField("year2025", "Sazby roku 2025 — jinak aktuální 2026")),
+        related = listOf("mateřska", "osetrowne"),
+    ) { v, t ->
+        val p = if (t["year2025"] == true) YearParams.YEAR_2025 else YearParams.YEAR_2026
+        val r = SickLeaveCalculator.calculate(v["gross"]!!.toDouble(), v["days"]!!.toInt(), p)
         listOf(
             CalcResult("Redukovaný DVZ (den)", fmtCzk(r.dailyBaseReduced)),
             CalcResult("Náhrada mzdy (1.–14. den)", fmtCzk(r.wageCompensation14d)),
@@ -448,10 +463,13 @@ val WORK_SPECS: List<CalcSpec> = listOf(
         toggles = listOf(
             ToggleField("age3", "Čerpat do 3 let — jinak do 2 let"),
             ToggleField("age4", "Čerpat do 4 let"),
+            ToggleField("year2025", "Sazby roku 2025 — jinak aktuální 2026"),
         ),
+        related = listOf("nemocenska", "miminko", "pridavky"),
     ) { v, t ->
         val age = if (t["age4"] == true) 4 else if (t["age3"] == true) 3 else 2
-        val r = MaternityCalculator.calculate(v["gross"]!!.toDouble(), v["parental"]!!.toDouble(), age)
+        val p = if (t["year2025"] == true) YearParams.YEAR_2025 else YearParams.YEAR_2026
+        val r = MaternityCalculator.calculate(v["gross"]!!.toDouble(), v["parental"]!!.toDouble(), age, p)
         listOf(
             CalcResult("Měsíční PPM", fmtCzk(r.ppmMonthly)),
             CalcResult("PPM celkem (28 týdnů)", fmtCzk(r.ppmTotal28w)),
@@ -489,6 +507,7 @@ val WORK_SPECS: List<CalcSpec> = listOf(
         fields = listOf(
             Field("gross", "Hrubá měsíční mzda", 5_000f, 200_000f, 1_000f, 30_000f, "Kč"),
         ),
+        related = listOf("mateřska"),
     ) { v, _ ->
         val r = PaternityCalculator.calculate(v["gross"]!!.toDouble())
         listOf(
@@ -507,6 +526,7 @@ val WORK_SPECS: List<CalcSpec> = listOf(
             Field("gross", "Hrubá měsíční mzda", 5_000f, 200_000f, 1_000f, 30_000f, "Kč"),
             Field("days", "Dny ošetřovného", 1f, 60f, 1f, 14f, ""),
         ),
+        related = listOf("nemocenska", "mateřska"),
     ) { v, _ ->
         val r = CareAllowanceCalculator.calculate(v["gross"]!!.toDouble(), v["days"]!!.toInt())
         listOf(

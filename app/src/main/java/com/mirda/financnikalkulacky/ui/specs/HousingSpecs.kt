@@ -73,6 +73,7 @@ val HOUSING_SPECS: List<CalcSpec> = listOf(
                     plan.map { ChartPoint(it.year.toFloat(), it.cumulativeInterest) }),
             )
         },
+        related = listOf("bonita", "vedlejni-naklady", "refinancovani"),
     ) { v, t ->
         val loan = v["loan"]!!.toDouble()
         val rate = v["rate"]!!.toDouble()
@@ -108,6 +109,7 @@ val HOUSING_SPECS: List<CalcSpec> = listOf(
             Field("rate", "Očekávaná sazba úvěru", 0.5f, 12f, 0.1f, 6f, "%"),
             Field("years", "Doba splácení", 5f, 40f, 1f, 30f, "let"),
         ),
+        related = listOf("hypoteka"),
     ) { v, _ ->
         val r = BonityCalculator.calculate(v["income"]!!.toDouble(), v["debt"]!!.toDouble(), v["price"]!!.toDouble(), v["ownFunds"]!!.toDouble(), v["rate"]!!.toDouble(), v["years"]!!.toInt())
         listOf(
@@ -236,6 +238,7 @@ val HOUSING_SPECS: List<CalcSpec> = listOf(
             Field("opex", "Provozní náklady (měs.)", 0f, 20_000f, 500f, 4_000f, "Kč"),
             Field("tax", "Efektivní daň z nájmu", 0f, 30f, 0.5f, 10.5f, "%"),
         ),
+        related = listOf("zdaneni-najmu", "vyska-najemneho", "koupvejnajem"),
     ) { v, _ ->
         val r = RentalYieldCalculator.calculate(v["price"]!!.toDouble(), v["rent"]!!.toDouble(), v["vacancy"]!!.toDouble(), v["opex"]!!.toDouble(), v["tax"]!!.toDouble())
         listOf(
@@ -264,6 +267,7 @@ val HOUSING_SPECS: List<CalcSpec> = listOf(
             Field("invReturn", "Výnos investice", 0f, 15f, 0.5f, 6f, "%/rok"),
             Field("horizon", "Horizont srovnání", 5f, 40f, 1f, 25f, "let"),
         ),
+        related = listOf("renta", "hypoteka"),
     ) { v, _ ->
         val r = BuyVsRentCalculator.calculate(v["price"]!!.toDouble(), v["ownFunds"]!!.toDouble(), v["mortRate"]!!.toDouble(), v["mortYears"]!!.toInt(), v["buyOpex"]!!.toDouble(), v["propGrowth"]!!.toDouble(), v["rentMonthly"]!!.toDouble(), v["rentGrowth"]!!.toDouble(), v["invReturn"]!!.toDouble(), v["horizon"]!!.toInt())
         val ownFunds = v["ownFunds"]!!.toDouble()
